@@ -73,6 +73,8 @@ func generateData(rawTable *Table) [][]string {
 		data[ci] = append(data[ci], rawTable.users[y]["Login"])
 		if rawTable.users[y]["Name"] != "" {
 			data[ci] = append(data[ci], rawTable.users[y]["Name"])
+		} else {
+			data[ci] = append(data[ci], "")
 		}
 		data[ci] = append(data[ci], rawTable.users[y]["Type"])
 		data[ci] = append(data[ci], strings.Join(rawTable.teams[y], ","))
