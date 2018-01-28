@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"context"
 )
 import (
 	"github.com/google/go-github/github"
@@ -108,6 +109,7 @@ func checkError(message string, err error) {
 }
 
 func fillTeamsTable(client *github.Client) (map[int][]string, error) {
+	ctx := context.TODO()
 	ListTeamMembersOpt := &github.OrganizationListTeamMembersOptions{
 		ListOptions: github.ListOptions{PerPage: 30},
 	}
@@ -122,7 +124,7 @@ func fillTeamsTable(client *github.Client) (map[int][]string, error) {
 	*/
 	tempTeamsTable := make([]*github.Team, 0)
 	for {
-		teams, resp, err := client.Organizations.ListTeams(organization, ListTeamsOpt)
+		teams, resp, err := client.Organizations.ListTeams(ctx, organization, ListTeamsOpt)
 		if err != nil {
 			return nil, fmt.Errorf("Error: %v\n", err)
 		}
@@ -145,7 +147,7 @@ func fillTeamsTable(client *github.Client) (map[int][]string, error) {
 	tempTable := make(map[string][]*github.User)
 	for _, team := range tempTeamsTable {
 		for {
-			allTeamMembers, resp, err := client.Organizations.ListTeamMembers(*team.ID, ListTeamMembersOpt)
+			allTeamMembers, resp, err := client.Organizations.ListTeamMembers(ctx, *team.ID, ListTeamMembersOpt)
 			if err != nil {
 				return nil, fmt.Errorf("Error: %v\n", err)
 			}
@@ -177,13 +179,14 @@ func fillTeamsTable(client *github.Client) (map[int][]string, error) {
 }
 
 func fillUsersTable(client *github.Client) (map[int]map[string]string, error) {
+	ctx := context.TODO()
 	ListMembersOpt := &github.ListMembersOptions{
 		ListOptions: github.ListOptions{PerPage: 30},
 	}
 
 	var allMembers []*github.User
 	for {
-		members, resp, err := client.Organizations.ListMembers(organization, ListMembersOpt)
+		members, resp, err := client.Organizations.ListMembers(ctx, organization, ListMembersOpt)
 		if err != nil {
 			return nil, fmt.Errorf("Error: %v\n", err)
 		}
@@ -207,7 +210,7 @@ func fillUsersTable(client *github.Client) (map[int]map[string]string, error) {
 	usersTable := make(map[int]map[string]string)
 	for _, member := range allMembers {
 		usersTable[*member.ID] = map[string]string{"Login": *member.Login, "Type": *member.Type}
-		user, _, err := client.Users.GetByID(*member.ID)
+		user, _, err := client.Users.GetByID(ctx, *member.ID)
 		if err != nil {
 			return nil, fmt.Errorf("Error: %v\n", err)
 		}
